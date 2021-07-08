@@ -1,4 +1,12 @@
-const parkingLot = require("./parkingLot")
+require('dotenv').config()
+
+const SIZE = parseInt(process.env.SIZE) || 5
+
+const ParkingLot = require("./ParkingLot")
+
+const parkingLot = new ParkingLot(SIZE)
+
+const ExpressError = require("./ExpressError")
 
 const express = require('express')
 
@@ -7,83 +15,61 @@ const app = express()
 app.use(express.json())
 
 app.get("/info", (req, res) => {
-
-    const info = {
-        size: parkingLot.length,
-        emptySlots: parkingLot.filter(slot => slot === null).length
-    }
-
-    res.json(info)
+    res.json(parkingLot.info)
 })
 
 app.get("/slot", (req, res) => {
-    const { slotId } = req.body
+    const { id } = req.body
 
-    const licensePlate = parkingLot[slotId - 1]
+    try {
+        const slot = parkingLot.findSlotById(id)
 
-    if (licensePlate === undefined) {
-        res.json({ error: `Slot ${slotId} does not exist!` })
-        return;
+        res.json(slot.info)
+
+    } catch (err) {
+        throw new ExpressError(err.message, 400)
     }
-
-    if (licensePlate === null) {
-        res.json({
-            slotId,
-            isEmpty: true
-        })
-
-        return;
-    }
-
-    console.log(parkingLot)
-
-    res.json({
-        slotId,
-        isEmpty: false,
-        licensePlate
-    })
 
 })
 
 app.post("/park", (req, res) => {
     const { licensePlate } = req.body
 
-    const emptySlotId = parkingLot.indexOf(null)
+    try {
+        const updatedSlot = parkingLot.park(licensePlate)
 
-    if (emptySlotId === -1) {
-        res.json({ error: "Parking lot is full!" })
-        return;
+        res.json({
+            action: "parking",
+            updatedSlot: updatedSlot.info
+        })
+
+    } catch (err) {
+        throw new ExpressError(err.message, 400)
     }
-
-    parkingLot[emptySlotId] = licensePlate
-
-    console.log(parkingLot)
-
-    res.json({
-        licensePlate,
-        slotId: emptySlotId + 1
-    })
 })
 
 
 app.delete("/unpark", (req, res) => {
     const { licensePlate } = req.body
 
-    const carSlotId = parkingLot.indexOf(licensePlate)
+    try {
+        const updatedSlot = parkingLot.unpark(licensePlate)
 
-    if (carSlotId === -1) {
-        res.json({ error: `No car with license plate ${licensePlate} was found` })
-        return;
+        res.json({
+            action: "unparking",
+            removedCarPlate: licensePlate,
+            updatedSlot: updatedSlot.info
+        })
+
+    } catch (err) {
+        throw new ExpressError(err.message, 400)
     }
+})
 
-    parkingLot.splice(carSlotId, 1, null)
-
-    console.log(parkingLot)
-
-    res.json({
-        licensePlate,
-        slotId: carSlotId + 1
-    })
+app.use((err, req, res, next) => {
+    const { statusCode = 500 } = err
+    if (!err.message) err.message = "Something went wrong!"
+    res.status(statusCode).json({ error: err.message })
 })
 
 const port = 3000
