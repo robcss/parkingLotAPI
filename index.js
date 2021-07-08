@@ -16,50 +16,74 @@ app.get("/info", (req, res) => {
     res.json(info)
 })
 
+app.get("/slot", (req, res) => {
+    const { slotId } = req.body
+
+    const licensePlate = parkingLot[slotId - 1]
+
+    if (licensePlate === undefined) {
+        res.json({ error: `Slot ${slotId} does not exist!` })
+        return;
+    }
+
+    if (licensePlate === null) {
+        res.json({
+            slotId,
+            isEmpty: true
+        })
+
+        return;
+    }
+
+    console.log(parkingLot)
+
+    res.json({
+        slotId,
+        isEmpty: false,
+        licensePlate
+    })
+
+})
 
 app.post("/park", (req, res) => {
     const { licensePlate } = req.body
 
-    const emptySlot = parkingLot.indexOf(null)
+    const emptySlotId = parkingLot.indexOf(null)
 
-    if (emptySlot === -1) {
+    if (emptySlotId === -1) {
         res.json({ error: "Parking lot is full!" })
         return;
     }
 
-    parkingLot[emptySlot] = licensePlate
+    parkingLot[emptySlotId] = licensePlate
 
     console.log(parkingLot)
 
-    const parked = {
+    res.json({
         licensePlate,
-        slot: emptySlot + 1
-    }
-
-    res.json(parked)
+        slotId: emptySlotId + 1
+    })
 })
 
 
 app.delete("/unpark", (req, res) => {
     const { licensePlate } = req.body
 
-    const carSlot = parkingLot.indexOf(licensePlate)
+    const carSlotId = parkingLot.indexOf(licensePlate)
 
-    if (carSlot === -1) {
+    if (carSlotId === -1) {
         res.json({ error: `No car with license plate ${licensePlate} was found` })
         return;
     }
 
-    parkingLot.splice(carSlot, 1, null)
+    parkingLot.splice(carSlotId, 1, null)
 
     console.log(parkingLot)
 
-    const unparked = {
+    res.json({
         licensePlate,
-        slot: carSlot + 1
-    }
-
-    res.json(unparked)
+        slotId: carSlotId + 1
+    })
 })
 
 const port = 3000
