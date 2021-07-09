@@ -12,6 +12,7 @@ const ExpressError = require("./ExpressError")
 const catchAsync = require("./catchAsync")
 
 const rateLimiter = require("./middleware/rateLimiter")
+const verifyToken = require("./middleware/verifyToken")
 
 const bcrypt = require("bcrypt")
 
@@ -33,7 +34,7 @@ app.post("/signup", catchAsync(async (req, res) => {
 
     users.push({ email, password: hash })
 
-    const token = jwt.sign({ user: req.body }, tokenSecret, { expiresIn: '24h' })
+    const token = jwt.sign({ email }, tokenSecret, { expiresIn: '24h' })
 
     res.json({ token })
 
@@ -60,7 +61,7 @@ app.get("/info", (req, res) => {
     res.json(parkingLot.info)
 })
 
-app.get("/slot", (req, res) => {
+app.get("/slot", verifyToken, (req, res) => {
     const { id } = req.body
 
     try {
