@@ -4,6 +4,7 @@ const catchAsync = require("./catchAsync")
 
 const rateLimiter = require("./middleware/rateLimiter")
 const verifyToken = require("./middleware/verifyToken")
+const validate = require("./middleware/validate")
 
 const usersController = require("./controllers/users-controller")
 const parkingController = require("./controllers/parkingLot-controller")
@@ -15,18 +16,17 @@ app.use(express.json())
 
 app.use(rateLimiter)
 
-app.post("/signup", catchAsync(usersController.signup))
+app.post("/signup", validate.user, catchAsync(usersController.signup))
 
-app.post("/login", catchAsync(usersController.login))
+app.post("/login", validate.user, catchAsync(usersController.login))
 
 app.get("/parkingLot", verifyToken, parkingController.getInfo)
 
-app.get("/slot", verifyToken, parkingController.getSlot)
+app.get("/slot", verifyToken, validate.slot, parkingController.getSlot)
 
-app.post("/park", verifyToken, parkingController.park)
+app.post("/park", verifyToken, validate.parking, parkingController.park)
 
-
-app.delete("/unpark", parkingController.unpark)
+app.delete("/unpark", verifyToken, validate.parking, parkingController.unpark)
 
 app.use((err, req, res, next) => {
     const { statusCode = 500 } = err
