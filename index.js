@@ -8,11 +8,15 @@ const parkingLot = new ParkingLot(SIZE)
 
 const ExpressError = require("./ExpressError")
 
+const rateLimiter = require("./middleware/rateLimiter")
+
 const express = require('express')
 
 const app = express()
 
 app.use(express.json())
+
+app.use(rateLimiter)
 
 app.get("/info", (req, res) => {
     res.json(parkingLot.info)
