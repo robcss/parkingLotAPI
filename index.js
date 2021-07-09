@@ -4,11 +4,19 @@ const SIZE = parseInt(process.env.SIZE) || 5
 
 const ParkingLot = require("./ParkingLot")
 
-const parkingLot = new ParkingLot(SIZE)
+const parkingLot = new ParkingLot(SIZE) // in-memory parking lot store
+
+const users = [] // in-memory users store
 
 const ExpressError = require("./ExpressError")
+const catchAsync = require("./catchAsync")
 
 const rateLimiter = require("./middleware/rateLimiter")
+
+const bcrypt = require("bcrypt")
+
+const jwt = require("jsonwebtoken")
+const tokenSecret = "dropTest"
 
 const express = require('express')
 
@@ -17,6 +25,36 @@ const app = express()
 app.use(express.json())
 
 app.use(rateLimiter)
+
+app.post("/signup", catchAsync(async (req, res) => {
+    const { email, password } = req.body
+
+    const hash = await bcrypt.hash(password, 10)
+
+    users.push({ email, password: hash })
+
+    const token = jwt.sign({ user: req.body }, tokenSecret, { expiresIn: '24h' })
+
+    res.json({ token })
+
+}))
+
+app.post("/login", catchAsync(async (req, res) => {
+    const { email, password } = req.body
+
+    const user = users.find(u => u.email === email)
+
+    if (!user) throw new ExpressError("Wrong email or password!", 401)
+
+    const match = await bcrypt.compare(password, user.password)
+
+    if (!match) throw new ExpressError("Wrong email or password!", 401)
+
+    const token = jwt.sign({ user: req.body }, tokenSecret, { expiresIn: '24h' })
+
+    res.json({ token })
+
+}))
 
 app.get("/info", (req, res) => {
     res.json(parkingLot.info)
