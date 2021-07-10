@@ -1,4 +1,4 @@
-const ExpressError = require("../ExpressError")
+const ExpressError = require("../utils/ExpressError")
 const { userSchema, slotSchema, parkingSchema } = require("../joiSchemas")
 
 const getValidationFunction = schema => {

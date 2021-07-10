@@ -2,8 +2,8 @@ const express = require('express')
 
 const cors = require('cors')
 
-const ExpressError = require("./ExpressError")
-const catchAsync = require("./catchAsync")
+const ExpressError = require("./utils/ExpressError")
+const catchAsync = require("./utils/catchAsync")
 
 const rateLimiter = require("./middleware/rateLimiter")
 const verifyToken = require("./middleware/verifyToken")

@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const ExpressError = require("../ExpressError")
+const ExpressError = require("../utils/ExpressError")
 
 const SIZE = parseInt(process.env.SIZE) || 5
 

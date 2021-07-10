@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const tokenSecret = process.env.TOKEN_SECRET || "test"
 
-const ExpressError = require("../ExpressError")
+const ExpressError = require("../utils/ExpressError")
 
 const users = [] // in-memory users store
 

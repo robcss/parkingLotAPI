@@ -3,7 +3,7 @@ require('dotenv').config()
 const jwt = require("jsonwebtoken")
 const tokenSecret = process.env.TOKEN_SECRET || "test"
 
-const ExpressError = require("../ExpressError")
+const ExpressError = require("../utils/ExpressError")
 
 module.exports = (req, res, next) => {
     const token = req.headers.authorization
