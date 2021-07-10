@@ -1,5 +1,8 @@
 const express = require('express')
 
+const cors = require('cors')
+
+const ExpressError = require("./ExpressError")
 const catchAsync = require("./catchAsync")
 
 const rateLimiter = require("./middleware/rateLimiter")
@@ -11,6 +14,9 @@ const parkingController = require("./controllers/parkingLot-controller")
 
 
 const app = express()
+
+app.use(cors())
+app.options('*', cors())
 
 app.use(express.json())
 
@@ -26,13 +32,19 @@ app.get("/slot", verifyToken, validate.slot, parkingController.getSlot)
 
 app.post("/park", verifyToken, validate.parking, parkingController.park)
 
-app.delete("/unpark", verifyToken, validate.parking, parkingController.unpark)
+app.post("/unpark", verifyToken, validate.parking, parkingController.unpark)
+
+app.all('*', (req, res, next) => {
+    next(new ExpressError('Endpoint Not Found', 404))
+})
 
 app.use((err, req, res, next) => {
     const { statusCode = 500 } = err
     if (!err.message) err.message = "Something went wrong!"
     res.status(statusCode).json({ error: err.message })
 })
+
+
 
 const port = 3000
 
