@@ -3,7 +3,7 @@ require('dotenv').config()
 const bcrypt = require("bcrypt")
 
 const jwt = require("jsonwebtoken")
-const tokenSecret = process.env.TOKEN_SECRET || "dropTest"
+const tokenSecret = process.env.TOKEN_SECRET || "test"
 
 const ExpressError = require("../ExpressError")
 
